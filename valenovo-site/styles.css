@@ -399,6 +399,62 @@ footer div span {
   color: white;
   margin-bottom: 2px;
 }
+.faq {
+  background: var(--white);
+}
+.faq-head {
+  display: grid;
+  grid-template-columns: 1.15fr 0.55fr;
+  gap: 11vw;
+}
+.faq-head h2 {
+  grid-column: 1;
+  font: clamp(50px, 5.7vw, 90px) / 0.91 var(--serif);
+  letter-spacing: -0.05em;
+  margin: 37px 0 0;
+}
+.faq-head > p:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+.faq-list {
+  max-width: 920px;
+  margin-top: 74px;
+  border-top: 1px solid var(--ink);
+}
+.faq-list details {
+  border-bottom: 1px solid var(--line);
+}
+.faq-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 25px 0;
+  cursor: pointer;
+  list-style: none;
+  font: 31px/1 var(--serif);
+  letter-spacing: -0.025em;
+}
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::marker { content: ""; }
+.faq-list summary span {
+  flex: 0 0 auto;
+  color: var(--gold);
+  font: 25px/1 var(--mono);
+  transition: transform .18s ease;
+}
+.faq-list details[open] summary span { transform: rotate(45deg); }
+.faq-list details p {
+  max-width: 730px;
+  margin: -3px 58px 27px 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
 .team {
   background: var(--paper);
 }
@@ -596,6 +652,7 @@ footer div {
   .intro-grid,
   .section-heading,
   .programme-head,
+  .faq-head,
   .contact-grid,
   .team-head {
     grid-template-columns: 1fr;
@@ -631,6 +688,23 @@ footer div {
   }
   .why-list {
     padding: 0 23px 80px;
+  }
+  .faq-head h2 {
+    margin-top: 30px;
+  }
+  .faq-head > p:last-child {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .faq-list {
+    margin-top: 50px;
+  }
+  .faq-list summary {
+    padding: 21px 0;
+    font-size: 27px;
+  }
+  .faq-list p {
+    margin-right: 0;
   }
   .team-grid {
     margin-top: 48px;
