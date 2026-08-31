@@ -437,7 +437,7 @@ footer div span {
   padding: 25px 0;
   cursor: pointer;
   list-style: none;
-  font: 31px/1 var(--serif);
+  font: 26px/1.08 var(--serif);
   letter-spacing: -0.025em;
 }
 .faq-list summary::-webkit-details-marker { display: none; }
@@ -701,7 +701,7 @@ footer div {
   }
   .faq-list summary {
     padding: 21px 0;
-    font-size: 27px;
+    font-size: 22px;
   }
   .faq-list p {
     margin-right: 0;
