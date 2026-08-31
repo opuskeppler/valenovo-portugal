@@ -16,8 +16,8 @@
     event.preventDefault();
     const email = form.elements.email.value.trim();
     const password = form.elements.password.value;
-    if (email !== '1234' || password !== '1234') {
-      error.textContent = 'Use 1234 nos dois campos para este teste.';
+    if (email !== 'ayapitaya@ayapitaya.com.br' || password !== 'europa2026') {
+      error.textContent = 'As credenciais indicadas não são válidas.';
       return;
     }
     sessionStorage.setItem(sessionKey, 'active');
