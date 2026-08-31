@@ -3,34 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AYA PITAYA — Portugal Launch · V2</title>
-  <style>
-    html,body,iframe { width:100%; min-height:100%; margin:0; border:0; }
-    iframe { display:block; min-height:100vh; }
-  </style>
+  <title>AYA PITAYA — Portugal Launch</title>
+  <meta http-equiv="refresh" content="0; url=escopo-estrategico.html" />
 </head>
 <body>
-  <iframe id="proposal" src="escopo-estrategico.html" title="AYA PITAYA — Portugal Launch · V2"></iframe>
-  <script>
-    const proposal = document.getElementById('proposal');
-    proposal.addEventListener('load', () => {
-      const doc = proposal.contentDocument;
-      doc.title = 'AYA PITAYA — Portugal Launch · V2';
-      const cards = doc.querySelectorAll('.price-card');
-      if (cards.length === 3) {
-        cards[0].innerHTML = '<strong>€5.400 + €3.600</strong><span>Fase 1 · Diagnóstico e plano de entrada</span><p>€5.400 no início (60%) · €3.600 na entrega final (40%). Duração estimada: 4–6 semanas.</p>';
-        cards[1].innerHTML = '<strong>6 × €6.800</strong><span>Fase 2 · Implantação da base Europa</span><p>6 mensalidades durante o período de implantação. Estrutura, parceiros, operação e base comercial.</p>';
-        cards[2].innerHTML = '<strong>A definir</strong><span>Fase 3 · Lançamento assistido</span><p>O investimento será definido em conjunto, após a Fase 2, de acordo com o âmbito final e a intensidade de acompanhamento necessária no lançamento.</p>';
-      }
-      const total = doc.querySelector('.total');
-      if (total) total.remove();
-      const phaseThreeNote = doc.querySelector('#phase-three .phase-note');
-      if (phaseThreeNote) phaseThreeNote.insertAdjacentHTML('beforeend', '<br><br><b>Investimento da Fase 3:</b> será definido em conjunto após a Fase 2, em função do âmbito final aprovado e do volume de acompanhamento executivo necessário durante o lançamento.');
-      const terms = doc.querySelector('.terms');
-      if (terms) terms.insertAdjacentHTML('beforeend', '<br><br><b>Fase 3:</b> proposta e investimento a acordar antes do lançamento, após confirmação do respectivo âmbito.');
-      proposal.style.height = `${doc.documentElement.scrollHeight}px`;
-      new ResizeObserver(() => proposal.style.height = `${doc.documentElement.scrollHeight}px`).observe(doc.body);
-    });
-  </script>
+  <p>A abrir a proposta actualizada. <a href="escopo-estrategico.html">Continuar</a></p>
 </body>
 </html>
