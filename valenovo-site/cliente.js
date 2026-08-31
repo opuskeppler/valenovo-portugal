@@ -3,32 +3,72 @@
   const dashboard = document.querySelector('#dashboard');
   const form = document.querySelector('#login-form');
   const error = document.querySelector('#form-error');
-  const sessionKey = 'valenovo-client-session';
-  // Keep the proposal on the same published site so the client area never depends
-  // on an expiring preview URL.
-  const proposalUrl = '../escopo-estrategico.html';
+  const logout = document.querySelector('#logout');
+  const company = document.querySelector('#client-company');
+  const config = window.VALENOVO_AUTH_CONFIG;
 
-  sessionStorage.removeItem(sessionKey);
-  login.hidden = false;
-  dashboard.hidden = true;
+  if (!config || !window.supabase) {
+    error.textContent = 'Não foi possível iniciar o acesso seguro. Tente novamente dentro de momentos.';
+    return;
+  }
 
-  form.addEventListener('submit', event => {
-    event.preventDefault();
-    const email = form.elements.email.value.trim();
-    const password = form.elements.password.value;
-    if (email !== 'ayapitaya@ayapitaya.com.br' || password !== 'europa2026') {
-      error.textContent = 'As credenciais indicadas não são válidas.';
-      return;
-    }
-    sessionStorage.setItem(sessionKey, 'active');
-    window.location.replace(proposalUrl);
+  const client = window.supabase.createClient(config.url, config.publishableKey, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
   });
 
-  document.querySelector('#logout').addEventListener('click', () => {
-    sessionStorage.removeItem(sessionKey);
+  const showLogin = () => {
     dashboard.hidden = true;
     login.hidden = false;
+  };
+
+  const showDashboard = async user => {
+    const { data } = await client
+      .from('client_profiles')
+      .select('company_name')
+      .eq('id', user.id)
+      .maybeSingle();
+    company.textContent = data?.company_name || user.user_metadata?.company_name || 'Cliente Valenovo';
+    login.hidden = true;
+    dashboard.hidden = false;
+  };
+
+  const restoreSession = async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user) await showDashboard(session.user);
+    else showLogin();
+  };
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    error.textContent = '';
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    submit.textContent = 'A validar acesso…';
+
+    const { error: signInError } = await client.auth.signInWithPassword({
+      email: form.elements.email.value.trim(),
+      password: form.elements.password.value
+    });
+
+    submit.disabled = false;
+    submit.innerHTML = 'Entrar na área de cliente <span>↗</span>';
+    if (signInError) {
+      error.textContent = 'E-mail ou palavra-passe inválidos.';
+      return;
+    }
+    await restoreSession();
+  });
+
+  logout.addEventListener('click', async () => {
+    await client.auth.signOut();
     form.reset();
+    showLogin();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  client.auth.onAuthStateChange((_event, session) => {
+    if (!session) showLogin();
+  });
+
+  restoreSession();
 })();
