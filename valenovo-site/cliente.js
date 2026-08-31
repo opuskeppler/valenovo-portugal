@@ -45,7 +45,7 @@
     submit.disabled = true;
     submit.textContent = 'A validar acesso…';
 
-    const { error: signInError } = await client.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await client.auth.signInWithPassword({
       email: form.elements.email.value.trim(),
       password: form.elements.password.value
     });
@@ -56,7 +56,11 @@
       error.textContent = 'E-mail ou palavra-passe inválidos.';
       return;
     }
-    await restoreSession();
+    // Use the authenticated user returned by the login request directly.
+    // This avoids a second session lookup delaying the transition in browsers
+    // where storage/session propagation is slower.
+    if (signInData.user) await showDashboard(signInData.user);
+    else await restoreSession();
   });
 
   logout.addEventListener('click', async () => {
