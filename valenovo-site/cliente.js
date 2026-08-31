@@ -12,8 +12,19 @@
     return;
   }
 
+  // A network request that never settles leaves a submit button frozen in a
+  // browser. Bound all Supabase fetches so the interface always recovers.
+  const fetchWithTimeout = (url, options = {}) => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    return fetch(url, { ...options, signal: controller.signal }).finally(() => {
+      window.clearTimeout(timeout);
+    });
+  };
+
   const client = window.supabase.createClient(config.url, config.publishableKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    global: { fetch: fetchWithTimeout }
   });
 
   const showLogin = () => {
@@ -21,7 +32,7 @@
     login.hidden = false;
   };
 
-  const showDashboard = async user => {
+  const showDashboard = user => {
     login.hidden = true;
     dashboard.hidden = false;
 
@@ -29,21 +40,20 @@
     // display name afterwards, so a slow profile query can never leave a
     // successful login apparently stuck on the form.
     company.textContent = user.user_metadata?.company_name || 'Cliente Valenovo';
-    try {
-      const { data } = await client
+    client
         .from('client_profiles')
         .select('company_name')
         .eq('id', user.id)
-        .maybeSingle();
-      if (data?.company_name) company.textContent = data.company_name;
-    } catch (_) {
-      // The client can continue to the workspace without an optional profile label.
-    }
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.company_name) company.textContent = data.company_name;
+        })
+        .catch(() => {});
   };
 
   const restoreSession = async () => {
     const { data: { session } } = await client.auth.getSession();
-    if (session?.user) await showDashboard(session.user);
+    if (session?.user) showDashboard(session.user);
     else showLogin();
   };
 
@@ -54,22 +64,24 @@
     submit.disabled = true;
     submit.textContent = 'A validar acesso…';
 
-    const { data: signInData, error: signInError } = await client.auth.signInWithPassword({
-      email: form.elements.email.value.trim(),
-      password: form.elements.password.value
-    });
+    try {
+      const { data: signInData, error: signInError } = await client.auth.signInWithPassword({
+        email: form.elements.email.value.trim(),
+        password: form.elements.password.value
+      });
 
-    submit.disabled = false;
-    submit.innerHTML = 'Entrar na área de cliente <span>↗</span>';
-    if (signInError) {
-      error.textContent = 'E-mail ou palavra-passe inválidos.';
-      return;
+      if (signInError) {
+        error.textContent = 'E-mail ou palavra-passe inválidos.';
+        return;
+      }
+      if (signInData.user) showDashboard(signInData.user);
+      else await restoreSession();
+    } catch (_) {
+      error.textContent = 'O acesso demorou demasiado a responder. Verifique a ligação e tente novamente.';
+    } finally {
+      submit.disabled = false;
+      submit.innerHTML = 'Entrar na área de cliente <span>↗</span>';
     }
-    // Use the authenticated user returned by the login request directly.
-    // This avoids a second session lookup delaying the transition in browsers
-    // where storage/session propagation is slower.
-    if (signInData.user) await showDashboard(signInData.user);
-    else await restoreSession();
   });
 
   logout.addEventListener('click', async () => {
@@ -79,8 +91,11 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  client.auth.onAuthStateChange((_event, session) => {
-    if (!session) showLogin();
+  client.auth.onAuthStateChange((event, session) => {
+    // Some browsers complete the auth state change before the original submit
+    // promise resolves. This is the earliest reliable point to open the area.
+    if (event === 'SIGNED_IN' && session?.user) showDashboard(session.user);
+    else if (!session) showLogin();
   });
 
   restoreSession();
