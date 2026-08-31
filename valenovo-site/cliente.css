@@ -1,6 +1,13 @@
 .client-page {
   background: var(--paper);
 }
+
+/* Author display rules take precedence over the browser's default [hidden]
+   rule. Keep the two authentication states mutually exclusive. */
+.client-login[hidden],
+.client-dashboard[hidden] {
+  display: none !important;
+}
 .portal-label {
   justify-self: center;
   display: flex;
