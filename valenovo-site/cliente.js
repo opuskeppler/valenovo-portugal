@@ -22,14 +22,23 @@
   };
 
   const showDashboard = async user => {
-    const { data } = await client
-      .from('client_profiles')
-      .select('company_name')
-      .eq('id', user.id)
-      .maybeSingle();
-    company.textContent = data?.company_name || user.user_metadata?.company_name || 'Cliente Valenovo';
     login.hidden = true;
     dashboard.hidden = false;
+
+    // The authenticated session is enough to open the workspace. Fetch the
+    // display name afterwards, so a slow profile query can never leave a
+    // successful login apparently stuck on the form.
+    company.textContent = user.user_metadata?.company_name || 'Cliente Valenovo';
+    try {
+      const { data } = await client
+        .from('client_profiles')
+        .select('company_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (data?.company_name) company.textContent = data.company_name;
+    } catch (_) {
+      // The client can continue to the workspace without an optional profile label.
+    }
   };
 
   const restoreSession = async () => {
