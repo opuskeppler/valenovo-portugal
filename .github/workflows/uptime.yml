@@ -1,0 +1,44 @@
+name: Valenovo availability
+
+on:
+  schedule:
+    # GitHub's smallest scheduled interval. Each request is retried before
+    # declaring an outage, preventing a brief edge-network hiccup from
+    # producing a false alarm.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-public-experience:
+    name: Check public site and client area
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify every public entry point
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          endpoints=(
+            'https://valenovo.eu/'
+            'https://valenovo.eu/valenovo-site/'
+            'https://valenovo.eu/valenovo-site/cliente.html'
+          )
+
+          for endpoint in "${endpoints[@]}"; do
+            echo "Checking ${endpoint}"
+            curl \
+              --fail \
+              --location \
+              --silent \
+              --show-error \
+              --max-time 20 \
+              --retry 2 \
+              --retry-all-errors \
+              --retry-delay 5 \
+              --output /dev/null \
+              "${endpoint}"
+          done
